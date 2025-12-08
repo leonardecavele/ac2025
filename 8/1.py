@@ -12,44 +12,27 @@
 
 from math import sqrt
 
-def solve(distances, taken, target) -> int:
+def solve(distances, target) -> int:
     network = []
     for i, current in enumerate(distances):
-        flag_found = 0
         if i == target:
             break
-        if taken[current[0][0]] or taken[current[0][1]]:
-            continue
-        for linked_list in network:
-            if min(current[0]) == min(linked_list[0]) and max(current[0]) == max(linked_list[0]):
-                break
-            if linked_list[0][0] == current[0][0] or linked_list[0][0] == current[0][1]:
-                if linked_list[0][0] == current[0][0]:
-                    taken[linked_list[0][0]] = True
-                    linked_list[0][0] = current[0][1]
-                else:
-                    taken[linked_list[0][0]] = True
-                    linked_list[0][0] = current[0][0]
-                linked_list[1] += 1
+        flag_found = 0
+        for k, linked_list in enumerate(network):
+            if current[0][0] in linked_list or current[0][1] in linked_list:
+                network[k] = list(set(linked_list + [current[0][0], current[0][1]]))
+                for j in range(len(network) - 1, k, -1):
+                    if current[0][0] in network[j] or current[0][1] in network[j]:
+                        network[k] = list(set(network[k] + network.pop(j)))
                 flag_found = 1
                 break
-            elif linked_list[0][1] == current[0][0] or linked_list[0][1] == current[0][1]:
-                if linked_list[0][1] == current[0][0]:
-                    taken[linked_list[0][1]] = True
-                    linked_list[0][1] = current[0][1]
-                else:
-                    taken[linked_list[0][1]] = True
-                    linked_list[0][1] = current[0][0]
-                linked_list[1] += 1
-                flag_found = 1
-                break
-        if not flag_found:
-            network.append([[current[0][0], current[0][1]], 2])
-        print(network)
+        if flag_found == 0:
+            network.append([current[0][0], current[0][1]])
+    network = sorted(network, key=lambda x: len(x), reverse=True)[:3]
+    print(len(network[0]) * len(network[1]) * len(network[2]))
 
 result = 0
-with open("test", "r", encoding="utf-8") as f:
-    taken: list[bool] = []
+with open("input", "r", encoding="utf-8") as f:
     distances: list[tuple[tuple[int, int], int]] = []
     values: list[list[int]] = [list(map(int, line.rstrip("\n").split(","))) for line in f]
     for i in range(len(values)):
@@ -60,6 +43,5 @@ with open("test", "r", encoding="utf-8") as f:
             for k in range(3):
                 tmp += (a[k] - b[k]) ** 2
             distances.append(((i, j), int(sqrt(tmp))))
-        taken.append(False)
     distances.sort(key=lambda d: d[1])
-    solve(distances, taken, 10)
+    solve(distances, 10)

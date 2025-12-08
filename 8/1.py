@@ -12,38 +12,54 @@
 
 from math import sqrt
 
-def solve(distances, ban) -> int:
-    minimum = None
-    network: list[list[tuple[tuple[int, int], int]]] = []
-    for current in enumerate(distances):
-        if ban[current[0][0]] < 2 and ban[current[0][1]] < 2:
-            ban[current[0][0]]["count"] += 1
-            ban[current[0][1]]["count"] += 1
-            ban[current[0][0]]["links"].append(current[0][1])
-            ban[current[0][1]]["links"].append(current[0][0])
-            network.append([])
-        #if minimum is None or current[1] < minimum[1]:
-        #    if (minimum[0][0] not in ban and minimum[0][1] not in ban) and 
-        #        minimum = current
-    print(ban)
-    #
-
-
+def solve(distances, taken, target) -> int:
+    network = []
+    for i, current in enumerate(distances):
+        flag_found = 0
+        if i == target:
+            break
+        if taken[current[0][0]] or taken[current[0][1]]:
+            continue
+        for linked_list in network:
+            if min(current[0]) == min(linked_list[0]) and max(current[0]) == max(linked_list[0]):
+                break
+            if linked_list[0][0] == current[0][0] or linked_list[0][0] == current[0][1]:
+                if linked_list[0][0] == current[0][0]:
+                    taken[linked_list[0][0]] = True
+                    linked_list[0][0] = current[0][1]
+                else:
+                    taken[linked_list[0][0]] = True
+                    linked_list[0][0] = current[0][0]
+                linked_list[1] += 1
+                flag_found = 1
+                break
+            elif linked_list[0][1] == current[0][0] or linked_list[0][1] == current[0][1]:
+                if linked_list[0][1] == current[0][0]:
+                    taken[linked_list[0][1]] = True
+                    linked_list[0][1] = current[0][1]
+                else:
+                    taken[linked_list[0][1]] = True
+                    linked_list[0][1] = current[0][0]
+                linked_list[1] += 1
+                flag_found = 1
+                break
+        if not flag_found:
+            network.append([[current[0][0], current[0][1]], 2])
+        print(network)
 
 result = 0
 with open("test", "r", encoding="utf-8") as f:
+    taken: list[bool] = []
     distances: list[tuple[tuple[int, int], int]] = []
-    ban: dict[int, int] = {}
     values: list[list[int]] = [list(map(int, line.rstrip("\n").split(","))) for line in f]
-    for i in range(len(values)): # loop to previous last
-        for j in range(i + 1, len(values)): # loop to last
+    for i in range(len(values)):
+        for j in range(i + 1, len(values)):
             a = values[i]
             b = values[j]
             tmp = 0
             for k in range(3):
                 tmp += (a[k] - b[k]) ** 2
             distances.append(((i, j), int(sqrt(tmp))))
-            ban[i] = 0
-    distances = sorted(distances, key=lambda d: (d[0][0], d[1]))
-    print(distances)
-    print(ban)
+        taken.append(False)
+    distances.sort(key=lambda d: d[1])
+    solve(distances, taken, 10)

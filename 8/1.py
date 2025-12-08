@@ -29,7 +29,7 @@ def solve(distances, target) -> int:
         if flag_found == 0:
             network.append([current[0][0], current[0][1]])
     network = sorted(network, key=lambda x: len(x), reverse=True)[:3]
-    print(len(network[0]) * len(network[1]) * len(network[2]))
+    return (len(network[0]) * len(network[1]) * len(network[2]))
 
 result = 0
 with open("input", "r", encoding="utf-8") as f:
@@ -42,6 +42,6 @@ with open("input", "r", encoding="utf-8") as f:
             tmp = 0
             for k in range(3):
                 tmp += (a[k] - b[k]) ** 2
-            distances.append(((i, j), int(sqrt(tmp))))
+            distances.append(((i, j), tmp))
     distances.sort(key=lambda d: d[1])
-    solve(distances, 10)
+    print(solve(distances, 1000))

@@ -10,11 +10,8 @@
 #                                                                              #
 # **************************************************************************** #
 
-def unique(array):
-    return (list(set(array)))
-
 result = 0
-with open("input", "r", encoding="utf-8") as f:
+with open("test", "r", encoding="utf-8") as f:
     green_tile = set()
     board = [list(map(int, line.rstrip("\n").split(","))) for line in f]
 
@@ -31,24 +28,17 @@ with open("input", "r", encoding="utf-8") as f:
         i += 1
     board_width = board[len(board) - 1][0]
 
-    board.sort(key=lambda v: v[1])
-    board_height = board[len(board) - 1][1]
-
-    for y in range(board_height + 1):
-        first = None
-        last = None
-        for x in range(board_width + 1):
-            if (x, y) in board or (x, y) in green_tile:
-                if first == None:
-                    first = x
-                last = x
-        while first is not None and last is not None and first < last:
-            green_tile.add((first, y))
-            first += 1
+    tmp = []
+    for x, y in green_tile:
+        for index in range(x, board_width):
+            tmp.append((index, y))
+    green_tile = set(list(green_tile) + tmp)
 
     for i in range(len(board)):
+        x1, y1 = board[i]
         for j in range(i + 1, len(board)):
-            tmp = (abs(board[i][0] - board[j][0]) + 1) * (abs(board[i][1] - board[j][1]) + 1)
-            if tmp > result and (board[i][0], board[j][1]) in green_tile and (board[j][0], board[i][1]) in green_tile:
+            x2, y2 = board[j]
+            tmp = (abs(x1 - x2) + 1) * (abs(y1 - y2) + 1)
+            if tmp > result and (x1, y2) in green_tile and (x2, y1) in green_tile:
                 result = tmp
     print(result) 
